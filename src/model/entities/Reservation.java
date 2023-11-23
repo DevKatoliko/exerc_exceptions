@@ -4,17 +4,23 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
 
+import model.exceptions.DomainException;
+
 public class Reservation {
 	private Integer roomNumber;
 	private LocalDate checkIn;
 	private LocalDate checkOut;
-	private static final DateTimeFormatter DMY = DateTimeFormatter.ofPattern("dd/MM/yyyy"); // importante feixar em estático
-	
+	private static final DateTimeFormatter DMY = DateTimeFormatter.ofPattern("dd/MM/yyyy"); // importante feixar em
+																							// estático
+
 	public Reservation() {
-		
+
 	}
-	
-	public Reservation(Integer roomNumber, LocalDate checkIn, LocalDate checkOut) {
+
+	public Reservation(Integer roomNumber, LocalDate checkIn, LocalDate checkOut)throws DomainException {
+		if(!checkIn.isBefore(checkOut)) {
+			throw new DomainException("Check-out date must be after check-in date");
+		}
 		this.roomNumber = roomNumber;
 		this.checkIn = checkIn;
 		this.checkOut = checkOut;
@@ -38,32 +44,31 @@ public class Reservation {
 
 	public Integer duration() {
 		Period period = Period.between(checkIn, checkOut);
-		 return period.getDays();
-		
+		return period.getDays();
+
 	}
-	
-	public String updateDates(LocalDate checkIn, LocalDate checkOut) {
-		LocalDate now = LocalDate.parse("01/01/2019",DMY);
+
+	public void updateDates(LocalDate checkIn, LocalDate checkOut) throws DomainException { // lança a excessão para onde o método está sendo chamado
+		LocalDate now = LocalDate.parse("01/01/2019", DMY);
 		if (checkIn.isBefore(now) || checkOut.isBefore(now)) {
-			return "Reservation dates for update must be future dates";
-		} 
+			throw new DomainException("Reservation dates for update must be future dates");
+		}
 		if (!checkIn.isBefore(checkOut)) {
-			return"Check-out date must be after check-in date";
-		} 
-		
+			throw new DomainException("Check-out date must be after check-in date");
+		}
+
 		this.checkIn = checkIn;
 		this.checkOut = checkOut;
-		return null;
 	}
-	
-	public String formatDate (LocalDate date) {
+
+	public String formatDate(LocalDate date) {
 		return DMY.format(date);
 	}
-	
+
 	@Override
 	public String toString() {
-		return "Reservetion: Room " + getRoomNumber() + ", check-in: " + formatDate(getCheckIn()) + ", check-out: " + formatDate(getCheckOut()) 
-		+", "+ duration() + " nights" ;
+		return "Reservetion: Room " + getRoomNumber() + ", check-in: " + formatDate(getCheckIn()) + ", check-out: "
+				+ formatDate(getCheckOut()) + ", " + duration() + " nights";
 	}
-	
+
 }
